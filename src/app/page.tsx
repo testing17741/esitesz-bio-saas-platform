@@ -40,6 +40,28 @@ export default async function HomePage() {
             </div>
           </Link>
 
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium text-slate-300">
+            <Link href="/services" className="hover:text-white transition-colors">
+              Services
+            </Link>
+            <Link href="/about" className="hover:text-white transition-colors">
+              About Us
+            </Link>
+            <Link href="/contact" className="hover:text-white transition-colors">
+              Contact
+            </Link>
+            <a
+              href="https://www.esitesz.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-sky-300 transition-colors"
+            >
+              <span>Esitesz Agency</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </nav>
+
           <nav className="flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-2">
@@ -114,7 +136,7 @@ export default async function HomePage() {
                 href="/login"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-sm transition-colors"
               >
-                <span>Client & Admin Login</span>
+                <span>Sign In to Account</span>
               </Link>
             </div>
           </div>
@@ -320,6 +342,39 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+        {/* Esitesz Parent Agency Banner */}
+        <section className="py-12 px-4 sm:px-6 bg-[#0f1724]/70 border-t border-slate-800">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 p-8 rounded-3xl bg-[#161b22] border border-sky-500/20 shadow-xl">
+            <div className="space-y-2 text-center md:text-left">
+              <span className="text-xs font-bold text-sky-400 uppercase tracking-widest font-mono">
+                Bespoke Software & Custom Solutions
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">
+                Looking for Custom Web Development or Enterprise Software?
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                eSitesz Connect is engineered by Esitesz Technologies. For full-scale custom websites, mobile applications, dedicated portals, and IT consulting, visit our primary company portal at esitesz.com.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <a
+                href="https://www.esitesz.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-lg"
+              >
+                <span>Visit Esitesz.com</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition-colors"
+              >
+                <span>Contact Inquiries</span>
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Global Footer */}
@@ -328,19 +383,28 @@ export default async function HomePage() {
           <div>
             <p>© {new Date().getFullYear()} eSitesz Connect. All Rights Reserved.</p>
             <p className="mt-0.5">
-              Designed & Developed by{' '}
+              Developed & Maintained by{' '}
               <a
                 href="https://www.esitesz.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sky-400 hover:underline font-semibold"
               >
-                Esitesz
+                Esitesz Technologies
               </a>
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/services" className="hover:text-white transition-colors">
+              Services
+            </Link>
+            <Link href="/about" className="hover:text-white transition-colors">
+              About Us
+            </Link>
+            <Link href="/contact" className="hover:text-white transition-colors">
+              Contact
+            </Link>
             <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy Policy (DPDP Act)
             </Link>
@@ -348,8 +412,17 @@ export default async function HomePage() {
               Terms of Service
             </Link>
             <Link href="/login" className="hover:text-white transition-colors">
-              Admin Login
+              Sign In
             </Link>
+            <a
+              href="https://www.esitesz.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 hover:underline inline-flex items-center gap-0.5 font-semibold"
+            >
+              <span>Esitesz.com</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
         </div>
       </footer>

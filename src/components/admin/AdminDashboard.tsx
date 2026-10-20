@@ -247,7 +247,7 @@ export function AdminDashboard() {
       <div className="bg-[#161b22] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-white">All Client & User Profiles</h2>
+            <h2 className="text-base font-bold text-white">All Profiles & Accounts</h2>
             <p className="text-xs text-slate-400">
               Moderate, approve, reject with reason, reassign, or directly edit any profile.
             </p>
