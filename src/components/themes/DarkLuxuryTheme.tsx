@@ -3,15 +3,9 @@
 import React, { useState } from 'react';
 import { Profile, ProfileLink } from '@/types';
 import { IconRenderer } from './IconRenderer';
-import {
-  ChevronRight,
-  MapPin,
-  QrCode,
-  UserPlus,
-  HelpCircle,
-  ChevronDown,
-  ExternalLink,
-} from 'lucide-react';
+import { ChevronRight, MapPin } from 'lucide-react';
+import { ShareModal } from '../ShareModal';
+import { QrCodeModal } from '../QrCodeModal';
 
 interface ThemeProps {
   profile: Profile;
@@ -26,16 +20,40 @@ export function DarkLuxuryTheme({
   onQrClick,
   isLivePreview = false,
 }: ThemeProps) {
-  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
+  const [internalShareOpen, setInternalShareOpen] = useState(false);
+  const [internalQrOpen, setInternalQrOpen] = useState(false);
+
+  const handleShareTrigger = () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator
+        .share({
+          title: profile.title,
+          text: profile.description || profile.title,
+          url: typeof window !== 'undefined' ? window.location.href : '',
+        })
+        .catch(() => {
+          if (onShareClick) {
+            onShareClick();
+          } else {
+            setInternalShareOpen(true);
+          }
+        });
+      return;
+    }
+    if (onShareClick) {
+      onShareClick();
+    } else {
+      setInternalShareOpen(true);
+    }
+  };
 
   const handleLinkClick = (link: ProfileLink) => {
     if (link.url === '#share' || link.icon === 'share') {
-      onShareClick?.();
+      handleShareTrigger();
       return;
     }
 
     if (!isLivePreview) {
-      // Beacon click tracking
       try {
         fetch('/api/analytics/click', {
           method: 'POST',
@@ -51,55 +69,88 @@ export function DarkLuxuryTheme({
     }
   };
 
-  const handleEmailClick = () => {
-    const email = profile.contact?.emailAddress || 'contact@esitesz.com';
-    const subject = encodeURIComponent(`Enquiry - ${profile.title}`);
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}`;
-
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(email).catch(() => {});
-    }
-    window.open(gmailUrl, '_blank', 'noopener,noreferrer');
-  };
-
   const activeLinks = (profile.links || [])
     .filter((l) => l.active)
     .sort((a, b) => a.order - b.order);
 
   const currentYear = new Date().getFullYear();
 
+  // Helper for brand-accurate background and border
+  const getIconContainerStyle = (link: ProfileLink) => {
+    const icon = link.icon.toLowerCase();
+    if (icon === 'whatsapp') {
+      return {
+        color: '#25D366',
+        background: 'linear-gradient(180deg, rgba(37,211,102,0.06), rgba(37,211,102,0.02))',
+        border: '1px solid rgba(37,211,102,0.06)',
+      };
+    }
+    if (icon === 'instagram') {
+      return {
+        color: '#E1306C',
+        background: 'linear-gradient(180deg, rgba(225,48,108,0.06), rgba(225,48,108,0.02))',
+        border: '1px solid rgba(225,48,108,0.06)',
+      };
+    }
+    if (icon === 'facebook') {
+      return {
+        color: '#1877F2',
+        background: 'linear-gradient(180deg, rgba(24,119,242,0.04), rgba(24,119,242,0.02))',
+        border: '1px solid rgba(24,119,242,0.04)',
+      };
+    }
+    if (icon === 'youtube') {
+      return {
+        color: '#FF0000',
+        background: 'linear-gradient(180deg, rgba(255,0,0,0.04), rgba(255,0,0,0.02))',
+        border: '1px solid rgba(255,0,0,0.04)',
+      };
+    }
+    if (icon === 'share') {
+      return {
+        color: '#0ea5e9',
+        background: 'linear-gradient(180deg, rgba(14,165,233,0.04), rgba(14,165,233,0.02))',
+        border: '1px solid rgba(14,165,233,0.04)',
+      };
+    }
+    const color = link.color || '#0ea5e9';
+    return {
+      color,
+      background: `linear-gradient(180deg, ${color}15, ${color}05)`,
+      border: `1px solid ${color}20`,
+    };
+  };
+
   return (
-    <div className="min-h-screen w-full bg-[#0f1724] text-[#e6eef8] font-sans antialiased py-8 px-4 sm:px-6 flex justify-center items-start">
-      <main className="w-full max-w-[760px] mx-auto">
-        <article className="bg-gradient-to-b from-white/[0.02] to-white/[0.01] rounded-[14px] p-6 sm:p-8 shadow-[0_8px_30px_rgba(2,6,23,0.6)] border border-white/[0.03]">
+    <div className="min-h-screen w-full bg-[#0f1724] text-[#e6eef8] font-sans antialiased p-2 sm:p-7 flex justify-center items-start">
+      <main className="w-full max-w-[760px] mx-auto mt-0 sm:mt-10">
+        <article className="bg-gradient-to-b from-white/[0.02] to-white/[0.01] rounded-[14px] p-3 sm:p-7 shadow-[0_8px_30px_rgba(2,6,23,0.6)] border border-white/[0.03] overflow-hidden">
           
-          {/* Profile Header */}
-          <header className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10 mb-7 pt-4 text-center sm:text-left">
-            <div className="relative group shrink-0">
-              <div className="w-[120px] h-[120px] sm:w-[138px] sm:h-[138px] rounded-full border-4 border-[#0ea5e9]/20 flex items-center justify-center bg-gradient-to-br from-white/[0.04] to-white/[0.01] shadow-[0_6px_28px_rgba(2,6,23,0.6)] overflow-hidden transition-transform duration-300 group-hover:scale-105">
-                {profile.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatarUrl}
-                    alt={profile.title}
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[#0b0f1a] text-sky-400 font-bold text-3xl">
-                    {profile.title.charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
+          {/* Profile Header (Horizontal on desktop, Centered on mobile) */}
+          <header className="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-10 mb-5 sm:mb-7 pt-0 sm:pt-5 text-center sm:text-left">
+            <div className="w-[120px] h-[120px] sm:w-[138px] sm:h-[138px] rounded-full border-4 border-[#0ea5e9]/15 flex items-center justify-center bg-gradient-to-br from-white/[0.03] to-white/[0.01] shadow-[0_6px_28px_rgba(2,6,23,0.6)] overflow-hidden shrink-0 transition-transform duration-300 hover:scale-105">
+              {profile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.title}
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-[#0b0f1a] text-sky-400 font-bold text-3xl">
+                  {profile.title.charAt(0).toUpperCase()}
+                </div>
+              )}
             </div>
 
-            <div className="flex-1 min-w-0 pt-1 sm:pt-4">
-              <div className="flex flex-col items-center sm:items-start gap-2 mb-3">
-                <h1 className="font-bold text-2xl sm:text-3xl text-white tracking-tight leading-tight">
+            <div className="flex-1 min-w-0 sm:pt-5">
+              <div className="flex flex-col items-center sm:items-start gap-2 mb-2 sm:mb-3">
+                <h1 className="font-['Montserrat',sans-serif] font-bold text-xl sm:text-[2rem] text-white tracking-[0.3px] leading-tight text-center sm:text-left max-w-[600px]">
                   {profile.title}
                 </h1>
                 {profile.subtitle && (
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-sky-500/15 to-emerald-500/10 text-sky-200 border border-sky-500/20 shadow-sm">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-[0.85rem] font-medium bg-gradient-to-r from-[#0ea5e9]/12 to-[#22c55e]/6 text-[#cdeffd] border border-[#0ea5e9]/10 shadow-sm mx-auto sm:mx-0">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     <span>{profile.subtitle}</span>
                   </div>
@@ -108,89 +159,108 @@ export function DarkLuxuryTheme({
             </div>
           </header>
 
-          {/* Description / Bio Section */}
+          {/* Description Section */}
           {profile.description && (
             <section
               aria-label="About"
-              className="my-4 sm:my-5 p-4 sm:p-5 text-center text-[#d6e6f5] text-sm sm:text-base leading-relaxed bg-gradient-to-b from-white/[0.02] to-white/[0.01] rounded-xl border border-white/[0.02]"
+              className="my-3 sm:my-4 p-3.5 sm:p-4 text-center text-[#d6e6f5] text-sm sm:text-base leading-relaxed bg-gradient-to-b from-white/[0.02] to-white/[0.01] rounded-xl border border-white/[0.02]"
             >
               {profile.description}
             </section>
           )}
 
-          {/* Quick Action Badges: Save Contact & QR Code */}
-          <div className="flex items-center justify-center gap-3 my-4">
-            <a
-              href={`/api/vcard/${profile.slug}`}
-              download
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-sky-300 transition-all hover:scale-[1.02]"
-            >
-              <UserPlus className="w-4 h-4 text-sky-400" />
-              <span>Save Contact</span>
-            </a>
+          {/* Social Links List */}
+          <nav aria-label="Social links" className="flex flex-col gap-2.5 sm:gap-3 my-4 sm:my-5">
+            {activeLinks.map((link) => {
+              const iconStyle = getIconContainerStyle(link);
+              const isShare = link.url === '#share' || link.icon === 'share';
+              const linkClasses = "w-full flex items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl text-left bg-gradient-to-b from-white/[0.015] to-white/[0.01] hover:bg-gradient-to-r hover:from-[#0ea5e9]/[0.04] hover:to-[#22c55e]/[0.02] border border-transparent hover:border-[#0ea5e9]/10 shadow-[0_4px_16px_rgba(2,6,23,0.3)] hover:shadow-[0_12px_36px_rgba(2,6,23,0.5)] transition-all duration-300 hover:translate-x-2 group cursor-pointer no-underline text-inherit";
 
-            <button
-              type="button"
-              onClick={onQrClick}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05] text-sky-300 transition-all hover:scale-[1.02]"
-            >
-              <QrCode className="w-4 h-4 text-sky-400" />
-              <span>QR Code</span>
-            </button>
-          </div>
+              const innerContent = (
+                <>
+                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+                    <div
+                      className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-[10px] flex items-center justify-center shrink-0 shadow-[0_6px_18px_rgba(2,6,23,0.45)]"
+                      style={{
+                        background: iconStyle.background,
+                        border: iconStyle.border,
+                        color: iconStyle.color,
+                      }}
+                    >
+                      <IconRenderer name={link.icon} color={iconStyle.color} className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm sm:text-base font-bold text-[#eef6ff] group-hover:text-white truncate">
+                        {link.title}
+                      </h3>
+                      {link.subtitle && (
+                        <p className="text-xs sm:text-[0.86rem] text-[#a9b7c8] group-hover:text-slate-300 truncate mt-0.5">
+                          {link.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#a9b7c8] group-hover:text-sky-300 transition-colors shrink-0" />
+                </>
+              );
 
-          {/* Social & Custom Links */}
-          <nav aria-label="Social links" className="flex flex-col gap-3 my-5">
-            {activeLinks.map((link) => (
-              <button
-                key={link.id}
-                type="button"
-                onClick={() => handleLinkClick(link)}
-                className="w-full flex items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl text-left bg-gradient-to-b from-white/[0.02] to-white/[0.01] hover:bg-gradient-to-r hover:from-sky-500/[0.06] hover:to-emerald-500/[0.03] border border-white/[0.02] hover:border-sky-500/20 shadow-[0_4px_16px_rgba(2,6,23,0.3)] hover:shadow-[0_8px_24px_rgba(2,6,23,0.5)] transition-all duration-300 hover:translate-x-1.5 group cursor-pointer"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border"
-                    style={{
-                      background: link.color
-                        ? `linear-gradient(180deg, ${link.color}18, ${link.color}08)`
-                        : 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
-                      borderColor: link.color ? `${link.color}30` : 'rgba(255,255,255,0.04)',
-                    }}
+              if (isShare) {
+                return (
+                  <button
+                    key={link.id}
+                    type="button"
+                    onClick={handleShareTrigger}
+                    className={linkClasses}
+                    aria-label={`Share ${profile.title}`}
                   >
-                    <IconRenderer name={link.icon} color={link.color} className="w-6 h-6" />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="text-sm sm:text-base font-semibold text-[#eef6ff] group-hover:text-white truncate">
-                      {link.title}
-                    </h2>
-                    {link.subtitle && (
-                      <p className="text-xs sm:text-sm text-[#a9b7c8] group-hover:text-slate-300 truncate mt-0.5">
-                        {link.subtitle}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-[#a9b7c8] group-hover:text-sky-300 transition-colors shrink-0" />
-              </button>
-            ))}
+                    {innerContent}
+                  </button>
+                );
+              }
+
+              return (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    if (!isLivePreview) {
+                      try {
+                        fetch('/api/analytics/click', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ profileId: profile.id, linkId: link.id }),
+                          keepalive: true,
+                        }).catch(() => {});
+                      } catch {}
+                    }
+                  }}
+                  className={linkClasses}
+                  aria-label={`${link.title}${link.subtitle ? ` - ${link.subtitle}` : ''}`}
+                >
+                  {innerContent}
+                </a>
+              );
+            })}
           </nav>
 
           {/* Contact Section */}
           {(profile.contact?.showCall ||
             profile.contact?.showWhatsapp ||
             profile.contact?.showEmail) && (
-            <section aria-label="Contact" className="mt-8">
+            <section aria-label="Contact" className="mt-4 sm:mt-6">
               <h3 className="text-center font-bold text-base sm:text-lg text-[#e9f3ff] mb-3">
                 Contact Us
               </h3>
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="flex flex-row justify-center items-stretch gap-2 sm:gap-3">
                 {profile.contact?.showCall && profile.contact?.callPhone && (
                   <a
                     href={`tel:${profile.contact.callPhone}`}
-                    className="flex flex-col items-center justify-center gap-1.5 p-3 sm:p-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.03] text-inherit transition-all duration-200 hover:-translate-y-1 shadow-[0_6px_18px_rgba(2,6,23,0.35)]"
+                    className="flex-1 flex flex-col items-center justify-center gap-1.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.05] hover:bg-gradient-to-r hover:from-white/[0.03] hover:to-white/[0.02] border border-white/[0.02] text-inherit transition-all duration-200 hover:-translate-y-1.5 shadow-[0_8px_20px_rgba(2,6,23,0.45)] no-underline"
+                    aria-label={`Call ${profile.contact.callPhone}`}
                   >
-                    <IconRenderer name="phone" color="#38bdf8" className="w-6 h-6" />
+                    <IconRenderer name="phone" color="#38bdf8" className="w-5 h-5 sm:w-6 sm:h-6" />
                     <span className="text-xs sm:text-sm font-semibold text-[#eaf6ff]">Call</span>
                   </a>
                 )}
@@ -200,22 +270,23 @@ export function DarkLuxuryTheme({
                     href={`https://wa.me/${profile.contact.whatsappNumber.replace(/[^0-9]/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col items-center justify-center gap-1.5 p-3 sm:p-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.03] text-inherit transition-all duration-200 hover:-translate-y-1 shadow-[0_6px_18px_rgba(2,6,23,0.35)]"
+                    className="flex-1 flex flex-col items-center justify-center gap-1.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.05] hover:bg-gradient-to-r hover:from-white/[0.03] hover:to-white/[0.02] border border-white/[0.02] text-inherit transition-all duration-200 hover:-translate-y-1.5 shadow-[0_8px_20px_rgba(2,6,23,0.45)] no-underline"
+                    aria-label={`WhatsApp ${profile.contact.whatsappNumber}`}
                   >
-                    <IconRenderer name="whatsapp" color="#22c55e" className="w-6 h-6" />
+                    <IconRenderer name="whatsapp" color="#22c55e" className="w-5 h-5 sm:w-6 sm:h-6" />
                     <span className="text-xs sm:text-sm font-semibold text-[#eaf6ff]">WhatsApp</span>
                   </a>
                 )}
 
                 {profile.contact?.showEmail && profile.contact?.emailAddress && (
-                  <button
-                    type="button"
-                    onClick={handleEmailClick}
-                    className="flex flex-col items-center justify-center gap-1.5 p-3 sm:p-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.03] text-inherit transition-all duration-200 hover:-translate-y-1 shadow-[0_6px_18px_rgba(2,6,23,0.35)] cursor-pointer"
+                  <a
+                    href={`mailto:${profile.contact.emailAddress}`}
+                    className="flex-1 flex flex-col items-center justify-center gap-1.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.05] hover:bg-gradient-to-r hover:from-white/[0.03] hover:to-white/[0.02] border border-white/[0.02] text-inherit transition-all duration-200 hover:-translate-y-1.5 shadow-[0_8px_20px_rgba(2,6,23,0.45)] no-underline cursor-pointer"
+                    aria-label={`Email ${profile.contact.emailAddress}`}
                   >
-                    <IconRenderer name="email" color="#f87171" className="w-6 h-6" />
+                    <IconRenderer name="email" color="#f87171" className="w-5 h-5 sm:w-6 sm:h-6" />
                     <span className="text-xs sm:text-sm font-semibold text-[#eaf6ff]">Email</span>
-                  </button>
+                  </a>
                 )}
               </div>
             </section>
@@ -223,72 +294,46 @@ export function DarkLuxuryTheme({
 
           {/* Location Badge */}
           {profile.contact?.showLocation && profile.locationText && (
-            <div className="my-5 p-3 sm:p-4 rounded-xl bg-gradient-to-b from-white/[0.015] to-white/[0.005] border border-white/[0.03] flex items-center justify-center gap-2 text-xs sm:text-sm font-medium text-[#a9b7c8] text-center">
-              <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
+            <div className="my-4 sm:my-5 p-3 rounded-xl bg-gradient-to-b from-white/[0.01] to-white/[0.005] border border-white/[0.02] flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-[#a9b7c8] text-center uppercase tracking-wide">
+              <MapPin className="w-4 h-4 text-[#38bdf8] shrink-0" />
               <span>{profile.locationText}</span>
             </div>
           )}
 
-          {/* AEO: Frequently Asked Questions (if enabled by user) */}
-          {profile.seo?.showFaqOnPage && profile.seo?.faqItems?.length > 0 && (
-            <section aria-label="FAQ" className="mt-8 pt-6 border-t border-white/[0.04]">
-              <div className="flex items-center gap-2 justify-center mb-4 text-[#eaf6ff] font-semibold text-sm sm:text-base">
-                <HelpCircle className="w-4 h-4 text-sky-400" />
-                <span>Frequently Asked Questions</span>
-              </div>
-              <div className="space-y-2">
-                {profile.seo.faqItems.map((faq) => {
-                  const isOpen = openFaqId === faq.id;
-                  return (
-                    <div
-                      key={faq.id}
-                      className="rounded-xl border border-white/[0.03] bg-white/[0.015] overflow-hidden"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
-                        className="w-full flex items-center justify-between p-3.5 text-left text-xs sm:text-sm font-medium text-slate-200 hover:text-white"
-                      >
-                        <span>{faq.question}</span>
-                        <ChevronDown
-                          className={`w-4 h-4 text-slate-400 transition-transform ${
-                            isOpen ? 'rotate-180 text-sky-400' : ''
-                          }`}
-                        />
-                      </button>
-                      {isOpen && (
-                        <div className="px-3.5 pb-3.5 text-xs sm:text-sm text-[#a9b7c8] leading-relaxed border-t border-white/[0.02] pt-2">
-                          {faq.answer}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Mandatory Esitesz Platform Footer */}
-          <footer className="mt-8 pt-4 border-t border-white/[0.03] text-center text-xs text-[#a9b7c8] space-y-1">
-            <p>
-              {profile.copyrightText ||
-                `© ${currentYear} ${profile.title}. All Rights Reserved.`}
-            </p>
-            <p className="flex items-center justify-center gap-1">
-              <span>{profile.footerText || 'Designed & Developed by'}</span>
-              <a
-                href={profile.footerUrl || 'https://www.esitesz.com'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sky-400 hover:text-sky-300 font-semibold inline-flex items-center gap-0.5 hover:underline"
-              >
-                <span>{profile.footerBrand || 'Esitesz'}</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </p>
+          {/* Exact Signature Esitesz Footer */}
+          <footer className="mt-3 pt-3 border-t border-white/[0.02] flex justify-center items-center text-center w-full" aria-label="Footer">
+            <div className="text-center text-xs sm:text-[0.85rem] text-[#a9b7c8] leading-relaxed">
+              <p>
+                {profile.copyrightText ||
+                  `© ${currentYear} ${profile.title}. All Rights Reserved.`}
+              </p>
+              <p>
+                {profile.footerText || 'Designed & Developed by'}{' '}
+                <a
+                  href={profile.footerUrl || 'https://www.esitesz.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#0ea5e9] hover:underline font-semibold"
+                >
+                  {profile.footerBrand || 'Esitesz'}
+                </a>
+              </p>
+            </div>
           </footer>
         </article>
       </main>
+
+      {/* Sharing and QR Modals (Triggered when user clicks "Share Page") */}
+      <ShareModal
+        isOpen={internalShareOpen}
+        onClose={() => setInternalShareOpen(false)}
+        profile={profile}
+      />
+      <QrCodeModal
+        isOpen={internalQrOpen}
+        onClose={() => setInternalQrOpen(false)}
+        profile={profile}
+      />
     </div>
   );
 }

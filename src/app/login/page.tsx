@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Sign In | eSitesz Bio SaaS',
+  title: 'Sign In | eSitesz Connect',
   description: 'Sign in with your email and password or request a 6-digit email OTP.',
 };
 

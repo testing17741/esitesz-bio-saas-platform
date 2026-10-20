@@ -4,8 +4,8 @@ import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | eSitesz Bio SaaS',
-  description: 'Terms of Service governing usage of eSitesz digital bio link and SaaS platform.',
+  title: 'Terms of Service | eSitesz Connect',
+  description: 'Terms of Service governing usage of eSitesz Connect digital identity and bio link platform.',
 };
 
 export default function TermsOfServicePage() {
@@ -29,7 +29,7 @@ export default function TermsOfServicePage() {
           <section className="space-y-2">
             <h2 className="text-base font-bold text-white">1. Acceptance of Terms</h2>
             <p>
-              By accessing or using eSitesz Bio Link SaaS platform, you agree to comply with and be bound by these Terms of Service.
+              By accessing or using eSitesz Connect platform, you agree to comply with and be bound by these Terms of Service.
             </p>
           </section>
 

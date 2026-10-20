@@ -35,7 +35,7 @@ export default async function HomePage() {
             <div>
               <span className="font-extrabold text-base tracking-tight text-white">eSitesz</span>
               <span className="text-xs text-sky-400 font-semibold ml-1 px-1.5 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/20">
-                SaaS
+                Connect
               </span>
             </div>
           </Link>
@@ -326,7 +326,7 @@ export default async function HomePage() {
       <footer className="border-t border-slate-800 bg-[#0f1724] py-8 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <div>
-            <p>© {new Date().getFullYear()} eSitesz SaaS Platform. All Rights Reserved.</p>
+            <p>© {new Date().getFullYear()} eSitesz Connect. All Rights Reserved.</p>
             <p className="mt-0.5">
               Designed & Developed by{' '}
               <a

@@ -10,11 +10,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "eSitesz Bio — Professional Bio Link & Digital Identity SaaS",
-    template: "%s | eSitesz Bio",
+    default: "eSitesz Connect — Digital Identity & Bio Platform",
+    template: "%s | eSitesz Connect",
   },
   description:
-    "Production SaaS platform enabling creators, leaders, and organizations to create high-converting bio link pages like Hasnain Baqai and JRM Antophill with dynamic SEO, AEO, and GEO optimization.",
+    "Official digital identity & bio link platform enabling creators, leaders, and organizations to create high-converting profile pages like Hasnain Baqai and JRM Antophill with dynamic SEO, AEO, and GEO optimization.",
   keywords: [
     "Bio Link",
     "Digital Business Card",

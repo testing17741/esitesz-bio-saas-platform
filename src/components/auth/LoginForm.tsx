@@ -221,13 +221,6 @@ export function LoginForm() {
         </button>
       </form>
 
-      {/* Seed Credentials Hint */}
-      <div className="mt-6 p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[11px] text-slate-400 space-y-1">
-        <p className="font-semibold text-slate-300">Default Super Admin Credentials:</p>
-        <p>Email: <code className="text-sky-400">admin@esitesz.com</code></p>
-        <p>Password: <code className="text-sky-400">Admin@Esitesz2026!</code></p>
-      </div>
-
       <div className="mt-6 text-center text-xs text-slate-400">
         Don&apos;t have an account yet?{' '}
         <Link href="/register" className="text-sky-400 hover:underline font-semibold">

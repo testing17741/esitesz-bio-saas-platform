@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Create Account | eSitesz Bio SaaS',
+  title: 'Create Account | eSitesz Connect',
   description: 'Create an account to build high-converting bio link pages and digital cards.',
 };
 
