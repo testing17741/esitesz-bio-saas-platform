@@ -125,7 +125,7 @@ export default function ContactPage() {
                 <div className="space-y-4 text-xs sm:text-sm">
                   {/* WhatsApp */}
                   <a
-                    href="https://wa.me/918369026984"
+                    href="https://wa.me/919152667967"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/40 transition-colors group"
@@ -135,7 +135,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-white">WhatsApp Direct Chat</p>
-                      <p className="text-slate-400 text-xs mt-0.5">+91 8369026984 / +91 8591106632</p>
+                      <p className="text-slate-400 text-xs mt-0.5">+91 9152667967</p>
                       <span className="text-[11px] text-emerald-400 font-medium inline-block mt-1">
                         Fastest Response ➔
                       </span>
@@ -144,7 +144,7 @@ export default function ContactPage() {
 
                   {/* Phone */}
                   <a
-                    href="tel:+918369026984"
+                    href="tel:+919152667967"
                     className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-sky-500/40 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -152,7 +152,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-white">Telephone Support</p>
-                      <p className="text-slate-400 text-xs mt-0.5">+91 8369026984</p>
+                      <p className="text-slate-400 text-xs mt-0.5">+91 9152667967</p>
                       <span className="text-[11px] text-sky-400 font-medium inline-block mt-1">
                         Mon – Sat, 10 AM – 7 PM IST
                       </span>

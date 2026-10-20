@@ -63,7 +63,7 @@ export function ContactTab({ profile, onChange }: ContactTabProps) {
               type="tel"
               value={contact.callPhone || ''}
               onChange={(e) => updateContact({ callPhone: e.target.value })}
-              placeholder="e.g. +91 8369026984"
+              placeholder="e.g. +91 9152667967"
               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
             />
           )}
@@ -96,7 +96,7 @@ export function ContactTab({ profile, onChange }: ContactTabProps) {
               type="text"
               value={contact.whatsappNumber || ''}
               onChange={(e) => updateContact({ whatsappNumber: e.target.value })}
-              placeholder="e.g. +91 8369026984 (Include country code)"
+              placeholder="e.g. +91 9152667967 (Include country code)"
               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
             />
           )}
