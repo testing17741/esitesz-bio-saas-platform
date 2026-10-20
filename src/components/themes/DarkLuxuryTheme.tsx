@@ -150,9 +150,12 @@ export function DarkLuxuryTheme({
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-white/[0.04]"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border"
                     style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
+                      background: link.color
+                        ? `linear-gradient(180deg, ${link.color}18, ${link.color}08)`
+                        : 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
+                      borderColor: link.color ? `${link.color}30` : 'rgba(255,255,255,0.04)',
                     }}
                   >
                     <IconRenderer name={link.icon} color={link.color} className="w-6 h-6" />
