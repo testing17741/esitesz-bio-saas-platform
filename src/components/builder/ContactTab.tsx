@@ -129,7 +129,7 @@ export function ContactTab({ profile, onChange }: ContactTabProps) {
               type="email"
               value={contact.emailAddress || ''}
               onChange={(e) => updateContact({ emailAddress: e.target.value })}
-              placeholder="e.g. contact@esitesz.com"
+              placeholder="e.g. testing17741+esitesz@gmail.com"
               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
             />
           )}

@@ -69,6 +69,17 @@ export function DarkLuxuryTheme({
     }
   };
 
+  const handleEmailClick = () => {
+    const email = profile.contact?.emailAddress || 'testing17741+esitesz@gmail.com';
+    const subject = encodeURIComponent(`Enquiry - ${profile.title}`);
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}`;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(email).catch(() => {});
+    }
+    window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const activeLinks = (profile.links || [])
     .filter((l) => l.active)
     .sort((a, b) => a.order - b.order);
@@ -279,14 +290,15 @@ export function DarkLuxuryTheme({
                 )}
 
                 {profile.contact?.showEmail && profile.contact?.emailAddress && (
-                  <a
-                    href={`mailto:${profile.contact.emailAddress}`}
-                    className="flex-1 flex flex-col items-center justify-center gap-1.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.05] hover:bg-gradient-to-r hover:from-white/[0.03] hover:to-white/[0.02] border border-white/[0.02] text-inherit transition-all duration-200 hover:-translate-y-1.5 shadow-[0_8px_20px_rgba(2,6,23,0.45)] no-underline cursor-pointer"
+                  <button
+                    type="button"
+                    onClick={handleEmailClick}
+                    className="flex-1 flex flex-col items-center justify-center gap-1.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.05] hover:bg-gradient-to-r hover:from-white/[0.03] hover:to-white/[0.02] border border-white/[0.02] text-inherit transition-all duration-200 hover:-translate-y-1.5 shadow-[0_8px_20px_rgba(2,6,23,0.45)] cursor-pointer"
                     aria-label={`Email ${profile.contact.emailAddress}`}
                   >
                     <IconRenderer name="email" color="#f87171" className="w-5 h-5 sm:w-6 sm:h-6" />
                     <span className="text-xs sm:text-sm font-semibold text-[#eaf6ff]">Email</span>
-                  </a>
+                  </button>
                 )}
               </div>
             </section>

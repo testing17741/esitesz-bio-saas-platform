@@ -2,7 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import fs from 'node:fs';
 import bcrypt from 'bcryptjs';
-import { User, Profile, OtpRecord, ProfileStatus, ThemeId } from '@/types';
+import { User, Profile, OtpRecord, ProfileStatus, ThemeId, ContactInquiry } from '@/types';
 
 // Crash-proof database path resolution for Vercel Serverless & Local
 function resolveDatabasePath(): string {
@@ -130,23 +130,41 @@ function initializeTables(db: DatabaseSync) {
       value TEXT NOT NULL
     );
   `);
+
+  // Contact Inquiries (from /contact form)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS contact_inquiries (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT,
+      subject TEXT NOT NULL,
+      service_type TEXT NOT NULL DEFAULT 'general',
+      message TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'new',
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_contact_inquiries_created_at ON contact_inquiries(created_at);
+    CREATE INDEX IF NOT EXISTS idx_contact_inquiries_status ON contact_inquiries(status);
+  `);
 }
 
 function seedInitialData(db: DatabaseSync) {
-  const adminEmail = process.env.SUPER_ADMIN_EMAIL || 'admin@esitesz.com';
-  const existingAdmin = db.prepare('SELECT id FROM users WHERE email = ?').get(adminEmail);
-
+  const adminEmail = process.env.SUPER_ADMIN_EMAIL || 'testing17741+esitesz@gmail.com';
   let adminId = 'user_superadmin_01';
+  const existingAdmin = db.prepare('SELECT id FROM users WHERE role = ? OR id = ?').get('superadmin', adminId);
+
   if (!existingAdmin) {
     const password = process.env.SUPER_ADMIN_PASSWORD || 'Admin@Esitesz2026!';
     const hash = bcrypt.hashSync(password, 10);
     const now = new Date().toISOString();
     db.prepare(`
-      INSERT INTO users (id, email, password_hash, name, role, is_verified, created_at, updated_at)
+      INSERT OR IGNORE INTO users (id, email, password_hash, name, role, is_verified, created_at, updated_at)
       VALUES (?, ?, ?, ?, 'superadmin', 1, ?, ?)
     `).run(adminId, adminEmail, hash, 'Esitesz Master Admin', now, now);
   } else {
     adminId = (existingAdmin as { id: string }).id;
+    db.prepare('UPDATE users SET email = ? WHERE id = ?').run(adminEmail, adminId);
   }
 
   // Pre-seed Profile 1: Hasnain Baqai (EXACT original data from https://hasnainbaqai.esitesz.com/)
@@ -280,117 +298,208 @@ function seedInitialData(db: DatabaseSync) {
       now
     );
   } else {
-    // If profile exists from earlier seed, ensure description and avatar match live site
+    // If profile exists from earlier seed, ensure description, avatar, and empty subtitle match live reference
     db.prepare(`
       UPDATE profiles 
-      SET description = ?, avatar_url = ?
-      WHERE slug = 'hasnainbaqai' AND (description IS NULL OR description = '' OR avatar_url LIKE '%.svg')
+      SET subtitle = '',
+          description = ?,
+          avatar_url = ?,
+          links_json = ?,
+          contact_json = ?,
+          seo_json = ?
+      WHERE slug = 'hasnainbaqai'
     `).run(
       'Aal E Nabi Aulaad E Ali Muhafiz e Namoos e Sahaba o AhleBait Bazu e Huzur Gayas e Millat Khalifa e Huzoor Gayas e Millat Nashir e Maslak e Ala Hazrat Qata e Rafziyat wa Tafzeeliyat Shahzada e Makhdoom e Millat Syedi Sarkar Syed e Millat Hazrat Syed Hasnain Miyan Baqai Safvi | (Nayeb Sajjadah Nasheen Khanqah e Aaliya Baqaiyah Safipur Sharif U.P).',
-      'https://hasnainbaqai.esitesz.com/HasnainBaqai.jpg'
+      'https://hasnainbaqai.esitesz.com/HasnainBaqai.jpg',
+      JSON.stringify([
+        {
+          id: 'link_hb_1',
+          title: 'WhatsApp Channel',
+          subtitle: 'Official Updates',
+          url: 'https://whatsapp.com/channel/0029Vb0GGgR9MF8wMiYpsL0L',
+          icon: 'whatsapp',
+          color: '#25D366',
+          active: true,
+          order: 1,
+        },
+        {
+          id: 'link_hb_2',
+          title: 'Instagram Page',
+          subtitle: '@syedhasnainbaqai',
+          url: 'https://www.instagram.com/syedhasnainbaqai?igsh=ajA2emthN21jNTVm',
+          icon: 'instagram',
+          color: '#E1306C',
+          active: true,
+          order: 2,
+        },
+        {
+          id: 'link_hb_3',
+          title: 'Facebook Page',
+          subtitle: '/syedhasnainbaqaisafipur',
+          url: 'https://m.facebook.com/syedhasnainbaqaisafipur/',
+          icon: 'facebook',
+          color: '#1877F2',
+          active: true,
+          order: 3,
+        },
+        {
+          id: 'link_hb_4',
+          title: 'YouTube Channel',
+          subtitle: '@syedshahhasnainbaqaisafvi',
+          url: 'https://m.youtube.com/@syedshahhasnainbaqaisafvi',
+          icon: 'youtube',
+          color: '#FF0000',
+          active: true,
+          order: 4,
+        },
+        {
+          id: 'link_hb_5',
+          title: 'Share Page',
+          subtitle: 'Share with others',
+          url: '#share',
+          icon: 'share',
+          color: '#0ea5e9',
+          active: true,
+          order: 5,
+        },
+      ]),
+      JSON.stringify({
+        callPhone: '+918369026984',
+        whatsappNumber: '+918369026984',
+        emailAddress: 'syedshahhasnainbaqaisafvi@gmail.com',
+        locationAddress: 'Safipur Sharif U.P',
+        showCall: true,
+        showWhatsapp: true,
+        showEmail: true,
+        showLocation: true,
+      }),
+      JSON.stringify({
+        metaTitle: 'Hasnain Baqai | Official Bio Link Page',
+        metaDescription:
+          'Official Bio Link page of Syed Shah Hasnain Baqai Ghayasi Safvi Qadri Official. Get direct access to official WhatsApp channel, Instagram, Facebook, and contact info.',
+        canonicalUrl: 'https://hasnainbaqai.esitesz.com/',
+        ogImage: 'https://hasnainbaqai.esitesz.com/SvgHasnainBaqai.svg',
+        keywords: [
+          'Hasnain Baqai',
+          'Syed Shah Hasnain Baqai',
+          'Safipur Sharif',
+          'Safvi Qadri Official',
+          'Esitesz',
+        ],
+        author: 'Syed Shah Hasnain Baqai',
+        entityType: 'Person',
+        aeoSummary:
+          'Syed Shah Hasnain Baqai Ghayasi Safvi Qadri is a spiritual leader based in Safipur Sharif, Uttar Pradesh, India.',
+        faqItems: [],
+        showFaqOnPage: false,
+        geoRegion: 'IN-UP',
+        geoPlacename: 'Safipur Sharif U.P',
+        addressCountry: 'IN',
+        noIndex: false,
+      })
     );
   }
 
   // Pre-seed Profile 2: JRM Antophill (EXACT original data from https://jrmantophill.esitesz.com/)
   const existingJrm = db.prepare('SELECT id FROM profiles WHERE slug = ?').get('jrmantophill');
+  const jrmLinks = [
+    {
+      id: 'link_jrm_1',
+      title: 'WhatsApp Channel',
+      subtitle: 'Official Updates',
+      url: 'https://whatsapp.com/channel/0029VacNKL4DjiOgHMNQdp2j',
+      icon: 'whatsapp',
+      color: '#25D366',
+      active: true,
+      order: 1,
+    },
+    {
+      id: 'link_jrm_2',
+      title: 'Instagram Page',
+      subtitle: '@jamatrazaemustafaantophill',
+      url: 'https://www.instagram.com/jrmantophill?igsh=a2dzNDYxb2VycW04',
+      icon: 'instagram',
+      color: '#E1306C',
+      active: true,
+      order: 2,
+    },
+    {
+      id: 'link_jrm_3',
+      title: 'Facebook Page',
+      subtitle: '/jamatrazaemustafaantophill',
+      url: 'https://www.facebook.com/share/19VizVNW9Q/',
+      icon: 'facebook',
+      color: '#1877F2',
+      active: true,
+      order: 3,
+    },
+    {
+      id: 'link_jrm_4',
+      title: 'YouTube Channel',
+      subtitle: '@jrmantophill-s8k',
+      url: 'http://www.youtube.com/@jrmantophill-s8k',
+      icon: 'youtube',
+      color: '#FF0000',
+      active: true,
+      order: 4,
+    },
+    {
+      id: 'link_jrm_5',
+      title: 'Share Page',
+      subtitle: 'Share with others',
+      url: '#share',
+      icon: 'share',
+      color: '#0ea5e9',
+      active: true,
+      order: 5,
+    },
+  ];
+
+  const jrmContact = {
+    callPhone: '+918591106632',
+    whatsappNumber: '+918591106632',
+    emailAddress: 'jamatrazaemustafa313@gmail.com',
+    locationAddress: 'AKBAR SULEMAN COMPOUND (BADA MAIDAN) ANTOPHILL WADALA',
+    showCall: true,
+    showWhatsapp: true,
+    showEmail: true,
+    showLocation: true,
+  };
+
+  const jrmSeo = {
+    metaTitle: 'JRM Antophill | Jamat Raza-E-Mustafa Antophill Wadala | Official Page',
+    metaDescription:
+      "Official page of Jamat Raza-E-Mustafa Antophill, Wadala — a Sunni Islamic organisation following Ahle Sunnah wal Jama'ah. Get WhatsApp updates, Instagram, Facebook, YouTube links, and contact details.",
+    canonicalUrl: 'https://jrmantophill.esitesz.com/',
+    ogImage: 'https://jrmantophill.esitesz.com/jrmantophill.jpeg',
+    keywords: [
+      'Jamat Raza-E-Mustafa',
+      'JRM Antophill',
+      'Wadala Mumbai',
+      'Ahle Sunnah wal Jamaah',
+      'Imam Ahmed Raza Khan',
+      'Esitesz',
+    ],
+    author: 'Jamat Raza-E-Mustafa Antophill',
+    entityType: 'Organization',
+    aeoSummary:
+      "Jamat Raza-e-Mustafa, founded by Imam Ahmed Raza Khan Fazil-e-Bareilvi رضى الله عنه, is a historical Sunni Islamic organisation following Ahle Sunnah wal Jama'ah, based in Antophill, Wadala, Mumbai.",
+    faqItems: [],
+    showFaqOnPage: false,
+    geoRegion: 'IN-MH',
+    geoPlacename: 'Antophill, Wadala, Mumbai',
+    geoLatitude: '19.0222',
+    geoLongitude: '72.8665',
+    streetAddress: 'Akbar Suleman Compound (Bada Maidan), Antophill',
+    addressLocality: 'Wadala, Mumbai',
+    addressRegion: 'Maharashtra',
+    postalCode: '400037',
+    addressCountry: 'IN',
+    noIndex: false,
+  };
+
   if (!existingJrm) {
     const now = new Date().toISOString();
-    const links = [
-      {
-        id: 'link_jrm_1',
-        title: 'WhatsApp Channel',
-        subtitle: 'Official Updates',
-        url: 'https://whatsapp.com/channel/0029VacNKL4DjiOgHMNQdp2j',
-        icon: 'whatsapp',
-        color: '#25D366',
-        active: true,
-        order: 1,
-      },
-      {
-        id: 'link_jrm_2',
-        title: 'Instagram Page',
-        subtitle: '@jrmantophill',
-        url: 'https://www.instagram.com/jrmantophill?igsh=a2dzNDYxb2VycW04',
-        icon: 'instagram',
-        color: '#E1306C',
-        active: true,
-        order: 2,
-      },
-      {
-        id: 'link_jrm_3',
-        title: 'Facebook Page',
-        subtitle: '/jrmantophill',
-        url: 'https://www.facebook.com/share/19VizVNW9Q/',
-        icon: 'facebook',
-        color: '#1877F2',
-        active: true,
-        order: 3,
-      },
-      {
-        id: 'link_jrm_4',
-        title: 'YouTube Channel',
-        subtitle: '@jrmantophill-s8k',
-        url: 'http://www.youtube.com/@jrmantophill-s8k',
-        icon: 'youtube',
-        color: '#FF0000',
-        active: true,
-        order: 4,
-      },
-      {
-        id: 'link_jrm_5',
-        title: 'Share Page',
-        subtitle: 'Share with others',
-        url: '#share',
-        icon: 'share',
-        color: '#0ea5e9',
-        active: true,
-        order: 5,
-      },
-    ];
-
-    const contact = {
-      callPhone: '+918591106632',
-      whatsappNumber: '+918591106632',
-      emailAddress: 'jamatrazaemustafa313@gmail.com',
-      locationAddress: 'AKBAR SULEMAN COMPOUND (BADA MAIDAN) ANTOPHILL WADALA',
-      showCall: true,
-      showWhatsapp: true,
-      showEmail: true,
-      showLocation: true,
-    };
-
-    const seo = {
-      metaTitle: 'JRM Antophill | Jamat Raza-E-Mustafa Antophill Wadala | Official Page',
-      metaDescription:
-        "Official page of Jamat Raza-E-Mustafa Antophill, Wadala — a Sunni Islamic organisation following Ahle Sunnah wal Jama'ah. Get WhatsApp updates, Instagram, Facebook, YouTube links, and contact details.",
-      canonicalUrl: 'https://jrmantophill.esitesz.com/',
-      ogImage: 'https://jrmantophill.esitesz.com/jrmantophill.jpeg',
-      keywords: [
-        'Jamat Raza-E-Mustafa',
-        'JRM Antophill',
-        'Wadala Mumbai',
-        'Ahle Sunnah wal Jamaah',
-        'Imam Ahmed Raza Khan',
-        'Esitesz',
-      ],
-      author: 'Jamat Raza-E-Mustafa Antophill',
-      entityType: 'Organization',
-      aeoSummary:
-        "Jamat Raza-e-Mustafa, founded by Imam Ahmed Raza Khan Fazil-e-Bareilvi رضى الله عنه, is a historical Sunni Islamic organisation following Ahle Sunnah wal Jama'ah, based in Antophill, Wadala, Mumbai.",
-      faqItems: [],
-      showFaqOnPage: false,
-      geoRegion: 'IN-MH',
-      geoPlacename: 'Antophill, Wadala, Mumbai',
-      geoLatitude: '19.0222',
-      geoLongitude: '72.8665',
-      streetAddress: 'Akbar Suleman Compound (Bada Maidan), Antophill',
-      addressLocality: 'Wadala, Mumbai',
-      addressRegion: 'Maharashtra',
-      postalCode: '400037',
-      addressCountry: 'IN',
-      noIndex: false,
-    };
-
     db.prepare(`
       INSERT INTO profiles (
         id, slug, user_id, title, subtitle, description, avatar_url, cover_url,
@@ -411,9 +520,9 @@ function seedInitialData(db: DatabaseSync) {
       'esitesz-dark-luxury',
       'approved',
       null,
-      JSON.stringify(links),
-      JSON.stringify(contact),
-      JSON.stringify(seo),
+      JSON.stringify(jrmLinks),
+      JSON.stringify(jrmContact),
+      JSON.stringify(jrmSeo),
       2180,
       JSON.stringify({ link_jrm_1: 890, link_jrm_2: 610, link_jrm_3: 310, link_jrm_4: 420 }),
       JSON.stringify([
@@ -429,14 +538,22 @@ function seedInitialData(db: DatabaseSync) {
       now
     );
   } else {
-    // If profile exists from earlier seed, ensure description and avatar match live site
+    // Force reset subtitle to empty (no badge), accurate handles, and no on-page FAQs
     db.prepare(`
       UPDATE profiles 
-      SET description = ?, avatar_url = ?
-      WHERE slug = 'jrmantophill' AND (description IS NULL OR description = '')
+      SET subtitle = '',
+          description = ?,
+          avatar_url = ?,
+          links_json = ?,
+          contact_json = ?,
+          seo_json = ?
+      WHERE slug = 'jrmantophill'
     `).run(
       "Jamat Raza-e-Mustafa, founded by Imam Ahmed Raza Khan Fazil-e-Bareilvi رضى الله عنه, is a historical Sunni organization following Ahle Sunnah wal Jama'ah. It aims to safeguard Sunni beliefs, refute Wahabi, Deobandi, and Shia sects, and promote religious, ethical, and social reform through Shariah guidance, led by Huzur Qaid e Millat Madda Zillahul Aali.",
-      'https://jrmantophill.esitesz.com/jrmantophill.jpeg'
+      'https://jrmantophill.esitesz.com/jrmantophill.jpeg',
+      JSON.stringify(jrmLinks),
+      JSON.stringify(jrmContact),
+      JSON.stringify(jrmSeo)
     );
   }
 }
@@ -849,6 +966,79 @@ export const dbService = {
         totalUsers: 1,
         totalViews: 3600,
       };
+    }
+  },
+
+  // Contact Inquiries Management
+  createContactInquiry(inquiry: Omit<ContactInquiry, 'id' | 'createdAt' | 'status'>): ContactInquiry {
+    const db = getDatabase();
+    const id = `inq_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
+    db.prepare(`
+      INSERT INTO contact_inquiries (id, name, email, phone, subject, service_type, message, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)
+    `).run(
+      id,
+      inquiry.name,
+      inquiry.email.toLowerCase().trim(),
+      inquiry.phone || null,
+      inquiry.subject,
+      inquiry.serviceType || 'general',
+      inquiry.message,
+      now
+    );
+    return {
+      id,
+      name: inquiry.name,
+      email: inquiry.email,
+      phone: inquiry.phone,
+      subject: inquiry.subject,
+      serviceType: inquiry.serviceType,
+      message: inquiry.message,
+      status: 'new',
+      createdAt: now,
+    };
+  },
+
+  listContactInquiries(): ContactInquiry[] {
+    try {
+      const db = getDatabase();
+      const rows = db.prepare(`
+        SELECT * FROM contact_inquiries ORDER BY created_at DESC
+      `).all() as any[];
+      return rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        email: r.email,
+        phone: r.phone || null,
+        subject: r.subject,
+        serviceType: r.service_type,
+        message: r.message,
+        status: r.status as 'new' | 'contacted' | 'resolved',
+        createdAt: r.created_at,
+      }));
+    } catch {
+      return [];
+    }
+  },
+
+  updateContactInquiryStatus(id: string, status: 'new' | 'contacted' | 'resolved'): boolean {
+    try {
+      const db = getDatabase();
+      db.prepare(`UPDATE contact_inquiries SET status = ? WHERE id = ?`).run(status, id);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  deleteContactInquiry(id: string): boolean {
+    try {
+      const db = getDatabase();
+      db.prepare(`DELETE FROM contact_inquiries WHERE id = ?`).run(id);
+      return true;
+    } catch {
+      return false;
     }
   },
 };

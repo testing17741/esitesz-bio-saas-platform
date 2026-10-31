@@ -126,3 +126,15 @@ export interface ApiResponse<T = unknown> {
   error?: string;
   message?: string;
 }
+
+export interface ContactInquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject: string;
+  serviceType: string;
+  message: string;
+  status: 'new' | 'contacted' | 'resolved';
+  createdAt: string;
+}

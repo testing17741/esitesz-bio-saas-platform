@@ -161,7 +161,7 @@ export default function ContactPage() {
 
                   {/* Email */}
                   <a
-                    href="mailto:contact@esitesz.com"
+                    href="mailto:testing17741+esitesz@gmail.com"
                     className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/40 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -169,7 +169,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-white">Official Email</p>
-                      <p className="text-slate-400 text-xs mt-0.5">contact@esitesz.com</p>
+                      <p className="text-slate-400 text-xs mt-0.5">testing17741+esitesz@gmail.com</p>
                       <span className="text-[11px] text-purple-400 font-medium inline-block mt-1">
                         Inquiries & Governance
                       </span>

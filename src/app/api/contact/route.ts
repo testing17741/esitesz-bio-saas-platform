@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { dbService } from '@/lib/db';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -34,22 +35,34 @@ export async function POST(req: NextRequest) {
 
     const { name, email, phone, subject, serviceType, message } = result.data;
 
+    // Save to database
+    const savedInquiry = dbService.createContactInquiry({
+      name,
+      email,
+      phone,
+      subject,
+      serviceType,
+      message,
+    });
+
     // Structured server log for traceability
-    console.info('[CONTACT_INQUIRY]', {
-      timestamp: new Date().toISOString(),
+    console.info('[CONTACT_INQUIRY_RECEIVED]', {
+      id: savedInquiry.id,
+      timestamp: savedInquiry.createdAt,
       name,
       email,
       phone: phone || 'N/A',
       subject,
       serviceType,
-      messageLength: message.length,
+      notifyEmail: 'testing17741+esitesz@gmail.com',
     });
 
     return NextResponse.json({
       success: true,
       data: {
+        id: savedInquiry.id,
         message:
-          'Thank you for reaching out! Your inquiry has been received. An Esitesz specialist will connect with you via email or WhatsApp shortly.',
+          'Thank you for reaching out! Your inquiry has been received. Our team will connect with you via email or WhatsApp shortly.',
       },
     });
   } catch (error) {
@@ -57,7 +70,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to process inquiry. Please reach out directly at contact@esitesz.com or via WhatsApp.',
+        error:
+          'Failed to process inquiry. Please reach out directly to testing17741+esitesz@gmail.com or via WhatsApp at +91 9152667967.',
       },
       { status: 500 }
     );
